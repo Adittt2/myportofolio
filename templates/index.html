@@ -56,12 +56,20 @@
             <div class="about-nav-wrap container">
                 <div class="about-nav">
                     <a href="#profile" class="about-brand">Home</a>
+ 
                     <div class="about-nav-links">
                         <a href="#social" class="about-nav-link">Social</a>
                         <a href="#proficiency" class="about-nav-link is-active">Proficiency</a>
                         <a href="#experience" class="about-nav-link">Experience</a>
                     </div>
-                    <a href="mailto:aditya.hamka@ui.ac.id" class="about-cta">Send a Message</a>
+ 
+                    <div class="about-nav-right">
+                        <input type="checkbox" id="about-nav-toggle" class="about-nav-toggle">
+                        <label for="about-nav-toggle" class="about-nav-burger" aria-label="Toggle menu">
+                            <span></span><span></span><span></span>
+                        </label>
+                        <a href="mailto:aditya.hamka@ui.ac.id" class="about-cta">Send a Message</a>
+                    </div>
                 </div>
             </div>
  
@@ -186,6 +194,16 @@
             <p>&copy; 2026 Aditya. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
     </footer>
+ 
+    <script>
+        // Close the mobile "About me" menu after a link is tapped
+        document.querySelectorAll('.about-nav-links a').forEach(function (link) {
+            link.addEventListener('click', function () {
+                var toggle = document.getElementById('about-nav-toggle');
+                if (toggle) toggle.checked = false;
+            });
+        });
+    </script>
 </body>
 </html>
  
