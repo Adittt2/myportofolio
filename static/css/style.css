@@ -165,12 +165,6 @@ h1, .brand {
     }
 }
  
-/* =========================================================================
-   ABOUT ME — dark sections (Proficiency / Experience)
-   Scoped with its own tokens so it can sit inside the same page as the
-   warm "paper" hero above without colliding with it.
-   ========================================================================= */
- 
 .about-shell {
     --night-top: #0d1b3d;
     --night-bottom: #05070f;
@@ -186,7 +180,6 @@ h1, .brand {
     padding-bottom: 1rem;
 }
  
-/* --- shared pill nav sitting on top of the dark sections --- */
  
 .about-nav-wrap {
     padding: 2rem 1.5rem 0;
@@ -267,7 +260,6 @@ h1, .brand {
     background-color: var(--amber-dark);
 }
  
-/* --- section heading block, shared by Proficiency + Experience --- */
  
 .about-section {
     padding: 3.5rem 0 4rem;
@@ -292,7 +284,6 @@ h1, .brand {
     margin-bottom: 3rem;
 }
  
-/* --- pagination dots --- */
  
 .dots {
     display: flex;
@@ -316,7 +307,6 @@ h1, .brand {
     border-color: #7b86ff;
 }
  
-/* --- Proficiency grid --- */
  
 .proficiency-grid {
     display: grid;
@@ -368,7 +358,6 @@ h1, .brand {
     margin-top: 0.65rem;
 }
  
-/* --- Experience cards --- */
  
 .experience-grid {
     display: grid;
