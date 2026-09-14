@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from main.models import Experience
+from main.models import Experience, Certification
 
 
 class MainTest(TestCase):
@@ -56,3 +56,37 @@ class MainTest(TestCase):
         self.assertFalse(self.experience.is_ongoing)
         self.assertContains(response, "Selesai")
         self.assertNotContains(response, "Sedang berlangsung")
+
+class CertificationPageTest(TestCase):
+    def setUp(self):
+        self.certification = Certification.objects.create(
+            title="Belajar Dasar Pemrograman Web",
+            issuer="Dicoding Indonesia",
+            issued_date="2026-06-01",
+            credential_url="https://www.dicoding.com/certificates/example",
+        )
+
+    def test_certifications_url_is_accessible(self):
+        response = self.client.get(reverse("main:show_certifications"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "certification.html")
+        self.assertContains(response, f'href="{reverse("main:show_certifications")}"')
+
+    def test_certification_model(self):
+        self.assertEqual(
+            str(self.certification),
+            "Belajar Dasar Pemrograman Web - Dicoding Indonesia",
+        )
+
+    def test_certification_data_appears_on_page(self):
+        response = self.client.get(reverse("main:show_certifications"))
+
+        self.assertContains(response, self.certification.title)
+        self.assertContains(response, self.certification.issuer)
+
+    def test_empty_certification_page(self):
+        Certification.objects.all().delete()
+        response = self.client.get(reverse("main:show_certifications"))
+
+        self.assertContains(response, "Belum ada sertifikasi yang ditambahkan.")

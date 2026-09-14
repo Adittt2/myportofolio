@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience - {{ name }}</title>
+    <title>Certifications - {{ name }}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -15,38 +15,39 @@
             <a href="{% url 'main:show_main' %}" class="brand">Aditya Hamka</a>
             <nav>
                 <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}" class="active">Experience</a>
-                <a href="{% url 'main:show_certifications' %}">Certifications</a>
+                <a href="{% url 'main:show_experience' %}">Experience</a>
+                <a href="{% url 'main:show_certifications' %}" class="active">Certifications</a>
             </nav>
         </div>
     </header>
 
     <main>
-        <section class="experience-section" id="experience">
+        <section class="experience-section" id="certifications">
             <div class="container">
-                <p class="section-kicker">Perjalanan saya sejauh ini</p>
-                <h1>Experience</h1>
+                <p class="section-kicker">Sertifikasi yang pernah saya raih</p>
+                <h1>Certifications</h1>
 
                 <div class="experience-grid">
-                    {% for experience in experience_list %}
+                    {% for certification in certification_list %}
                         <article class="experience-card">
-                            <span class="experience-category">
-                                {{ experience.get_category_display }}
-                            </span>
-                            <h2>{{ experience.title }}</h2>
+                            <h2>{{ certification.title }}</h2>
                             <p class="experience-description">
-                                {{ experience.description }}
+                                Diterbitkan oleh {{ certification.issuer }}
                             </p>
-
-                            {% if experience.is_ongoing %}
-                                <p class="experience-status">Sedang berlangsung</p>
-                            {% else %}
-                                <p class="experience-status">Selesai</p>
+                            <p class="experience-status">
+                                {{ certification.issued_date }}
+                            </p>
+                            {% if certification.credential_url %}
+                                <p>
+                                    <a href="{{ certification.credential_url }}" target="_blank" rel="noopener">
+                                        Lihat Sertifikat
+                                    </a>
+                                </p>
                             {% endif %}
                         </article>
                     {% empty %}
                         <p class="empty-state">
-                            Belum ada pengalaman yang ditambahkan.
+                            Belum ada sertifikasi yang ditambahkan.
                         </p>
                     {% endfor %}
                 </div>
@@ -59,14 +60,5 @@
             <p>&copy; 2026 Aditya Hamka. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
     </footer>
-
-    <script>
-        document.querySelectorAll('.about-nav-links a').forEach(function (link) {
-            link.addEventListener('click', function () {
-                var toggle = document.getElementById('about-nav-toggle');
-                if (toggle) toggle.checked = false;
-            });
-        });
-    </script>
 </body>
 </html>

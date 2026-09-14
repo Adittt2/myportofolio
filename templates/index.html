@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aditya - Portfolio</title>
+    <title>Aditya Hamka - Portfolio</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
@@ -12,14 +12,15 @@
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">Aditya</a>
+            <a href="{% url 'main:show_main' %}" class="brand">Aditya Hamka</a>
             <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
+                <a href="{% url 'main:show_main' %}" class="active">Profile</a>
                 <a href="{% url 'main:show_experience' %}">Experience</a>
+                <a href="{% url 'main:show_certifications' %}">Certifications</a>
             </nav>
         </div>
     </header>
- 
+
     <main>
         <section class="hero" id="profile">
             <div class="container hero-grid">
@@ -32,7 +33,7 @@
                     <img class="avatar" src="/static/img/Adit.jpeg" alt="Photo of Adit">
                 </div>
                 <div class="hero-details">
-                    <p class="bio">Information System Student at UI. Love and eiger to learn something new, also like to use my spare time to read any novel book. Ready to experience many things in many country.</p>
+                    <p class="bio">Information System Student at UI. Love and eager to learn something new, also like to use my spare time to read any novel book. Ready to experience many things in many country.</p>
                     <dl class="meta-list">
                         <div class="meta-row">
                             <dt>NPM</dt>
@@ -51,18 +52,18 @@
                 </div>
             </div>
         </section>
- 
+
         <section class="about-shell" id="about">
             <div class="about-nav-wrap container">
                 <div class="about-nav">
                     <a href="#profile" class="about-brand">Home</a>
- 
+
                     <div class="about-nav-links">
                         <a href="#social" class="about-nav-link">Social</a>
                         <a href="#proficiency" class="about-nav-link is-active">Proficiency</a>
                         <a href="#experience" class="about-nav-link">Experience</a>
                     </div>
- 
+
                     <div class="about-nav-right">
                         <input type="checkbox" id="about-nav-toggle" class="about-nav-toggle">
                         <label for="about-nav-toggle" class="about-nav-burger" aria-label="Toggle menu">
@@ -72,14 +73,14 @@
                     </div>
                 </div>
             </div>
- 
+
             <section class="about-section" id="proficiency">
                 <div class="container">
                     <span class="eyebrow-pill">About Me</span>
                     <h2 class="about-title">Proficiency</h2>
- 
+
                     <div class="proficiency-grid">
- 
+
                         <div class="proficiency-card">
                             <div class="proficiency-pill">
                                 <img class="proficiency-icon-img" src="/static/img/figma.jpg" alt="Figma icon">
@@ -87,7 +88,7 @@
                             </div>
                             <p class="proficiency-label">Figma</p>
                         </div>
- 
+
                         <div class="proficiency-card">
                             <div class="proficiency-pill">
                                 <img class="proficiency-icon-img" src="/static/img/python.jpg" alt="Python icon">
@@ -95,7 +96,7 @@
                             </div>
                             <p class="proficiency-label">Python</p>
                         </div>
- 
+
                         <div class="proficiency-card">
                             <div class="proficiency-pill">
                                 <img class="proficiency-icon-img" src="/static/img/office.jpg" alt="Microsoft Office icon">
@@ -103,7 +104,7 @@
                             </div>
                             <p class="proficiency-label">Ms. Office</p>
                         </div>
- 
+
                         <div class="proficiency-card">
                             <div class="proficiency-pill">
                                 <img class="proficiency-icon-img" src="/static/img/language.jpg" alt="Language proficiency icon">
@@ -111,7 +112,7 @@
                             </div>
                             <p class="proficiency-label">English</p>
                         </div>
- 
+
                         <div class="proficiency-card">
                             <div class="proficiency-pill">
                                 <img class="proficiency-icon-img" src="/static/img/time.png" alt="Time management icon">
@@ -119,23 +120,18 @@
                             </div>
                             <p class="proficiency-label">Time Management</p>
                         </div>
- 
-                    </div>
- 
-                    <div class="dots" aria-hidden="true">
-                        <span class="dot is-active"></span>
-                        <span class="dot"></span>
+
                     </div>
                 </div>
             </section>
- 
+
             <section class="about-section" id="experience">
                 <div class="container">
                     <span class="eyebrow-pill">About Me</span>
                     <h2 class="about-title">Experience</h2>
- 
+
                     <div class="experience-grid">
- 
+
                         <article class="experience-card">
                             <div class="experience-media">
                                 <img src="/static/img/sasamboGTN.jpeg" alt="Sasambo GTN 2026 committee group photo">
@@ -148,7 +144,7 @@
                                 <span class="experience-number">1</span>
                             </div>
                         </article>
- 
+
                         <article class="experience-card">
                             <div class="experience-media">
                                 <img src="/static/img/compfest.png" alt="COMPFEST logo">
@@ -161,7 +157,7 @@
                                 <span class="experience-number">2</span>
                             </div>
                         </article>
- 
+
                         <article class="experience-card">
                             <div class="experience-media">
                                 <img src="/static/img/iconBem.png" alt="BEM Fasilkom 2026 logo">
@@ -174,25 +170,19 @@
                                 <span class="experience-number">3</span>
                             </div>
                         </article>
- 
-                    </div>
- 
-                    <div class="dots" aria-hidden="true">
-                        <span class="dot is-active"></span>
-                        <span class="dot"></span>
-                        <span class="dot"></span>
+
                     </div>
                 </div>
             </section>
         </section>
     </main>
- 
+
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2026 Aditya. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+            <p>&copy; 2026 Aditya Hamka. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
     </footer>
- 
+
     <script>
         document.querySelectorAll('.about-nav-links a').forEach(function (link) {
             link.addEventListener('click', function () {
@@ -203,4 +193,3 @@
     </script>
 </body>
 </html>
- 
