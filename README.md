@@ -17,3 +17,6 @@ Dalam proses pembuatan tugas 2 kali ini, saya menggunakan bantuan dari generativ
 1. Saat saya membuka web portofolio dan memencet experience atau certification, browser akan mengirim request kepada server yang kemudian akan ditangkap oleh urls.py project saya yang kemudian akan kembali dikirimkan ke urls.py aplikasi berdasarkan path yang terdapat dalam URL. urls.py aplikasi kemudian akan menentukan view yang sesuai dengan path,  kemudian view mengambil data lewat query dan mengirimnya ke template yang kemudian dirender menjadi hmtl lalu dikirim balik ke browser sebagai response.
 2. Data sudah seharusnya di model agar memastikan data dapat di-update dan disesuaikan secara real-time tanpa harus mengubah atau edit code yang kemudian di-deploy kembali karena bersifat statis. Sehingga proses maintenance menjadi lebih efisien.
 3. makemigrations hanya bertugas dalam membuat file migrasi tanpa mengubah database, sedangkan migrate bertugas untuk menjalankan migrasi file ke database.
+
+### Tugas 4
+Dalam proses pembuuatan tugas 4, saya menggunakan bantuan dari generative AI, yaitu Claude, dalam membantu saya memahami alur dan menyusun code yaitu pada code html dan css.
