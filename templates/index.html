@@ -1,26 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aditya Hamka - Portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">Aditya Hamka</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}" class="active">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_certifications' %}">Certifications</a>
-            </nav>
-        </div>
-    </header>
-
+ {% extends 'base.html' %}
+ {% block content %}
     <main>
         <section class="hero" id="profile">
             <div class="container hero-grid">
@@ -37,11 +16,15 @@
                     <dl class="meta-list">
                         <div class="meta-row">
                             <dt>NPM</dt>
-                            <dd>2506552752</dd>
+                            <dd>{{ npm }}</dd>
                         </div>
                         <div class="meta-row">
                             <dt>Program</dt>
-                            <dd>S1 Sistem Informasi</dd>
+                            <dd>{{ study_program }}</dd>
+                        </div>
+                        <div class="meta-row">
+                            <dt>Sesi Terakhir Login</dt>
+                            <dd>{{ last_login }}</dd>
                         </div>
                     </dl>
                     <div class="social-links">
@@ -58,11 +41,6 @@
                 <div class="about-nav">
                     <a href="#profile" class="about-brand">Home</a>
 
-                    <div class="about-nav-links">
-                        <a href="#social" class="about-nav-link">Social</a>
-                        <a href="#proficiency" class="about-nav-link is-active">Proficiency</a>
-                        <a href="#experience" class="about-nav-link">Experience</a>
-                    </div>
 
                     <div class="about-nav-right">
                         <input type="checkbox" id="about-nav-toggle" class="about-nav-toggle">
@@ -124,64 +102,8 @@
                     </div>
                 </div>
             </section>
-
-            <section class="about-section" id="experience">
-                <div class="container">
-                    <span class="eyebrow-pill">About Me</span>
-                    <h2 class="about-title">Experience</h2>
-
-                    <div class="experience-grid">
-
-                        <article class="experience-card">
-                            <div class="experience-media">
-                                <img src="/static/img/sasamboGTN.jpeg" alt="Sasambo GTN 2026 committee group photo">
-                            </div>
-                            <div class="experience-body">
-                                <div class="experience-text">
-                                    <h3>Sasambo GTN 2026</h3>
-                                    <p>Staff pre-event dan PJ lomba</p>
-                                </div>
-                                <span class="experience-number">1</span>
-                            </div>
-                        </article>
-
-                        <article class="experience-card">
-                            <div class="experience-media">
-                                <img src="/static/img/compfest.png" alt="COMPFEST logo">
-                            </div>
-                            <div class="experience-body">
-                                <div class="experience-text">
-                                    <h3>COMPFEST</h3>
-                                    <p>Staff of decor</p>
-                                </div>
-                                <span class="experience-number">2</span>
-                            </div>
-                        </article>
-
-                        <article class="experience-card">
-                            <div class="experience-media">
-                                <img src="/static/img/iconBem.png" alt="BEM Fasilkom 2026 logo">
-                            </div>
-                            <div class="experience-body">
-                                <div class="experience-text">
-                                    <h3>BEM Fasilkom 2026</h3>
-                                    <p>Akademi dan Profesi staff</p>
-                                </div>
-                                <span class="experience-number">3</span>
-                            </div>
-                        </article>
-
-                    </div>
-                </div>
-            </section>
         </section>
     </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 Aditya Hamka. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
 
     <script>
         document.querySelectorAll('.about-nav-links a').forEach(function (link) {
@@ -191,5 +113,5 @@
             });
         });
     </script>
-</body>
-</html>
+    
+ {% endblock content %}

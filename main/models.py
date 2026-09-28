@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.conf import settings
 
 class Experience(models.Model):
     EXPERIENCE_CHOICES = [
@@ -18,12 +19,19 @@ class Experience(models.Model):
     thumbnail = models.URLField(blank=True, null=True)
     started_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(blank=True, null=True)
+
     def __str__(self):
         return self.title
     
     @property
     def is_ongoing(self):
         return self.ended_at is None
+
+    starred_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="starred_experiences",
+        blank=True,
+    )
 
 class Certification(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
