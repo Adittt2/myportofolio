@@ -180,29 +180,43 @@ def delete_experience(request, experience_id):
 
 def get_certifications_json(request):
     title_query = request.GET.get("title", "").strip()
-    certifications = Certification.objects.all().order_by("-issued_date")
+    certifications = (
+        Certification.objects.prefetch_related("starred_by").order_by("-issued_date")
+    )
 
     if title_query:
         certifications = certifications.filter(title__icontains=title_query)
 
-    certifications_json = serializers.serialize("json", certifications)
-    return HttpResponse(certifications_json, content_type="application/json")
+    data = []
+    for certification in certifications:
+        starred_users = list(certification.starred_by.all())
+        is_starred = (
+            request.user in starred_users if request.user.is_authenticated else False
+        )
+
+        data.append({
+            "pk": str(certification.id),
+            "fields": {
+                "title": certification.title,
+                "issuer": certification.issuer,
+                "issued_date": certification.issued_date.strftime("%d %B %Y"),
+                "credential_url": certification.credential_url or "",
+                "star_count": len(starred_users),
+                "is_starred": is_starred,
+                "starred_by_names": ", ".join(u.username for u in starred_users),
+            },
+        })
+
+    return JsonResponse(data, safe=False)
 
 
 def show_certifications(request):
-    json_response = get_certifications_json(request)
-
-    certifications = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    certifications = [certification.object for certification in certifications]
     title_query = request.GET.get("title", "").strip()
 
     context = {
         "name": "Aditya Hamka",
-        "certification_list": certifications,
         "title_query": title_query,
+        "form": CertificationForm(),
     }
     return render(request, "certification.html", context)
 
@@ -225,6 +239,49 @@ def create_certification(request):
         "form": form,
     }
     return render(request, "certification_form.html", context)
+
+@require_POST
+def create_certification_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan sertifikasi."},
+            status=403,
+        )
+
+    form = CertificationForm(request.POST)
+    if form.is_valid():
+        certification = form.save()
+        return JsonResponse(
+            {"message": "Sertifikasi berhasil ditambahkan.", "pk": str(certification.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
+
+
+@require_POST
+def toggle_star_certification(request, certification_id):
+    if not request.user.is_authenticated:
+        return JsonResponse(
+            {"message": "Silakan login untuk memberi star."},
+            status=401,
+        )
+
+    certification = get_object_or_404(Certification, pk=certification_id)
+
+    if certification.starred_by.filter(pk=request.user.pk).exists():
+        certification.starred_by.remove(request.user)
+        is_starred = False
+    else:
+        certification.starred_by.add(request.user)
+        is_starred = True
+
+    starred_users = certification.starred_by.all()
+    return JsonResponse({
+        "is_starred": is_starred,
+        "star_count": starred_users.count(),
+        "starred_by_names": ", ".join(u.username for u in starred_users),
+    })
 
 
 @login_required(login_url="/login/")

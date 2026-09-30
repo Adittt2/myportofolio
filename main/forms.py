@@ -40,6 +40,18 @@ class CertificationForm(ModelForm):
             ),
         }
 
+    def clean_title(self):
+        title = strip_tags(self.cleaned_data["title"]).strip()
+        if not title:
+            raise ValidationError("Nama sertifikasi tidak boleh hanya berisi tag HTML.")
+        return title
+
+    def clean_issuer(self):
+        issuer = strip_tags(self.cleaned_data["issuer"]).strip()
+        if not issuer:
+            raise ValidationError("Nama penerbit tidak boleh hanya berisi tag HTML.")
+        return issuer
+
 class ExperienceForm(ModelForm):
 
     class Meta:

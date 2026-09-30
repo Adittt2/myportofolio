@@ -16,6 +16,8 @@ from main.views import (
     logout_user,
     create_experience_ajax,
     toggle_star_experience,
+    create_certification_ajax,
+    toggle_star_certification,
 )
 
 app_name = "main"
@@ -36,4 +38,6 @@ urlpatterns = [
     path("api/certifications/", get_certifications_json, name="get_certifications_json"),
     path("experience/add-ajax/", create_experience_ajax, name="create_experience_ajax"),
     path("experience/<uuid:experience_id>/star/", toggle_star_experience, name="toggle_star_experience"),
+    path("certifications/add-ajax/", create_certification_ajax, name="create_certification_ajax"),
+    path("certifications/<uuid:certification_id>/star/", toggle_star_certification, name="toggle_star_certification"),
 ]

@@ -39,6 +39,11 @@ class Certification(models.Model):
     issuer = models.CharField(max_length=255)
     issued_date = models.DateField()
     credential_url = models.URLField(blank=True, null=True)
+    starred_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="starred_certifications",
+        blank=True,
+    )
 
     def __str__(self):
         return f"{self.title} - {self.issuer}"
