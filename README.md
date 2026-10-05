@@ -20,3 +20,10 @@ Dalam proses pembuatan tugas 2 kali ini, saya menggunakan bantuan dari generativ
 
 ### Tugas 4
 Dalam proses pembuuatan tugas 4, saya menggunakan bantuan dari generative AI, yaitu Claude, dalam membantu saya memahami alur dan menyusun code yaitu pada code html dan css.
+
+### Tugas 5
+1.Debouncing yaitu menunda terjadinya eksekusi fungsi sampai user berhenti memicunya. Hal tersebut penting karena input pencarian AJAX terpicu setiap karakter ditekan sehingga kalau tanpa debouncing maka inputnya sangat banyak yang dapat membebani server dan database serta tampilan yang akan tidak stabil karena di-render setiap kali mengetik
+2.fetch() asinkron dan langsung mengembalikan Promise. Await menjeda fungsi async hingga Promise selesai dan memberikan nilai aslinya tanpa membekukan halaman. Sehingga jika tidak ada await, maka variabel hanya menyimpan Promise yang belum selesai dan bukan nilai aslinya.
+3.XSS merupakan serangan saat penyerang menyisipkan JavaScript ke halaman melalui input yang kemudian akan dijalankan di browser victim untuk bertindak atas nama mereja. Data AJAX lebih rentan karena tidak meng-escape {{}} secara otomatis seperti django, 
+
+ 

@@ -1064,3 +1064,37 @@ h1, .brand {
 .star-count {
     font-weight: 700;
 }
+
+.star-btn { 
+    cursor: pointer; 
+    padding: .3rem .7rem; 
+    border: 1px solid rgba(255, 255, 255, .35); 
+    border-radius: 999px; background: transparent; 
+    color: #e8e8e8; font: inherit; 
+}
+
+.star-btn:hover { 
+    border-color: #f5a623; 
+    color: #f5a623; 
+}
+
+.star-btn[aria-pressed="true"] { 
+    border-color: #f5a623; 
+    color: #f5a623; 
+    font-weight: 700; 
+}
+
+.cert-actions a { 
+    color: #f5a623; 
+}
+
+#open-cert-modal { 
+    padding: .6rem 1.1rem; 
+    border: 0; 
+    border-radius: 999px; 
+    background: #f5a623; 
+    color: #111; 
+    font: inherit; 
+    font-weight: 600; 
+    cursor: pointer; 
+}
