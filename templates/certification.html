@@ -15,6 +15,7 @@
   .cert-state.is-error { color: #b3261e; }
   .star-btn { cursor: pointer; padding: .3rem .7rem; border: 1px solid #ccc; border-radius: 999px; background: transparent; }
   .star-btn[aria-pressed="true"] { border-color: #c98a00; color: #c98a00; font-weight: 700; }
+  .delete-btn { cursor: pointer; padding: .3rem .7rem; border: 1px solid #b3261e; border-radius: 999px; background: transparent; color: #b3261e; }
   #cert-modal { border: 1px solid #ccc; border-radius: 10px; padding: 1.5rem; width: min(480px, 92vw); }
   #cert-modal::backdrop { background: rgba(0, 0, 0, .5); }
   #cert-form .field { margin-bottom: 1rem; }
@@ -25,7 +26,9 @@
 {% endblock meta %}
  
 {% block content %}
-<main class="container" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
+<main class="container"
+      data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}"
+      data-superuser="{{ user.is_superuser|yesno:'true,false' }}">
   <h1>Certifications</h1>
  
   <div class="cert-toolbar">
@@ -59,15 +62,26 @@
 {% endif %}
  
 <script src="{% static 'js/utils.js' %}"></script>
+{% csrf_token %}
 <script>
-  const LIST_URL = "{% url 'main:get_certifications_json' %}";
-  const CREATE_URL = "{% url 'main:create_certification_ajax' %}";
-  const STAR_URL_TEMPLATE = "{% url 'main:toggle_star_certification' '00000000-0000-0000-0000-000000000000' %}";
-  const IS_AUTHENTICATED = document.querySelector("main").dataset.authenticated === "true";
+  const LIST_URL = "{% url 'api:certification-list' %}";
+  const DETAIL_URL_TEMPLATE = "{% url 'api:certification-detail' '00000000-0000-0000-0000-000000000000' %}";
+  const STAR_URL_TEMPLATE = "{% url 'api:certification-star' '00000000-0000-0000-0000-000000000000' %}";
+  const ID_PLACEHOLDER = "00000000-0000-0000-0000-000000000000";
+
+  const mainEl = document.querySelector("main");
+  const IS_AUTHENTICATED = mainEl.dataset.authenticated === "true";
+  const IS_SUPERUSER = mainEl.dataset.superuser === "true";
  
   const listEl = document.getElementById("cert-list");
   const stateEl = document.getElementById("cert-state");
   const searchEl = document.getElementById("cert-search");
+
+  const modal = document.getElementById("cert-modal");
+  const form = document.getElementById("cert-form");
+  const openBtn = document.getElementById("open-cert-modal");
+  const closeBtn = document.getElementById("close-cert-modal");
+  const submitBtn = document.getElementById("submit-cert");
  
   let currentQuery = "";
   let latestRequestId = 0;
@@ -81,26 +95,74 @@
   function isSafeUrl(url) {
     return /^https?:\/\//i.test(url);
   }
+
+  function certUrl(template, id) {
+    return template.replace(ID_PLACEHOLDER, id);
+  }
+
+  // API mengirim tanggal ISO (YYYY-MM-DD); format tampilannya dibuat di sini.
+  function formatDate(isoDate) {
+    const [year, month, day] = String(isoDate || "").split("-").map(Number);
+    if (!year || !month || !day) return String(isoDate || "");
+    return new Date(year, month - 1, day).toLocaleDateString("id-ID", {
+      day: "numeric", month: "long", year: "numeric",
+    });
+  }
+
+  function starLabel(isStarred, count) {
+    return `${isStarred ? "★ Starred" : "☆ Star"} (<span class="star-count">${count}</span>)`;
+  }
  
-  function renderCertification(item) {
-    const f = item.fields;
-    const credential = f.credential_url && isSafeUrl(f.credential_url)
-      ? `<a href="${escapeHtml(f.credential_url)}" target="_blank" rel="noopener noreferrer">Lihat kredensial</a>`
+  function renderCertification(cert) {
+    const credential = cert.credential_url && isSafeUrl(cert.credential_url)
+      ? `<a href="${escapeHtml(cert.credential_url)}" target="_blank" rel="noopener noreferrer">Lihat kredensial</a>`
       : "";
-    const starTitle = f.starred_by_names ? escapeHtml(f.starred_by_names) : "Belum ada yang memberi star";
+    const starTitle = cert.starred_by_names ? escapeHtml(cert.starred_by_names) : "Belum ada yang memberi star";
+    const remove = IS_SUPERUSER
+      ? `<button type="button" class="delete-btn" data-id="${escapeHtml(cert.id)}">Hapus</button>`
+      : "";
  
     return `
       <article class="cert-card">
-        <h3>${escapeHtml(f.title)}</h3>
-        <p class="cert-meta">${escapeHtml(f.issuer)} &middot; ${escapeHtml(f.issued_date)}</p>
+        <h3>${escapeHtml(cert.title)}</h3>
+        <p class="cert-meta">${escapeHtml(cert.issuer)} &middot; ${escapeHtml(formatDate(cert.issued_date))}</p>
         <div class="cert-actions">
-          <button type="button" class="star-btn" data-id="${escapeHtml(item.pk)}"
-                  aria-pressed="${f.is_starred}" title="${starTitle}">
-            ${f.is_starred ? "★ Starred" : "☆ Star"} (<span class="star-count">${f.star_count}</span>)
+          <button type="button" class="star-btn" data-id="${escapeHtml(cert.id)}"
+                  aria-pressed="${cert.is_starred}" title="${starTitle}">
+            ${starLabel(cert.is_starred, cert.star_count)}
           </button>
           ${credential}
+          ${remove}
         </div>
       </article>`;
+  }
+
+  // Error DRF berbentuk {"title": ["..."]} atau {"detail": "..."}.
+  function apiErrorMessage(data, status) {
+    const lines = [];
+    for (const [field, value] of Object.entries(data || {})) {
+      const messages = [].concat(value).filter(v => typeof v === "string");
+      if (!messages.length) continue;
+      const label = form ? form.querySelector(`label[for="id_${field}"]`) : null;
+      lines.push(label ? `${label.textContent}: ${messages.join(" ")}` : messages.join(" "));
+    }
+    return lines.join(" | ") || `Request failed (HTTP ${status}).`;
+  }
+
+  async function apiRequest(url, method, payload) {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken") || "",
+      },
+      body: payload === undefined ? undefined : JSON.stringify(payload),
+    });
+    if (res.status === 204) return null;
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(apiErrorMessage(data, res.status));
+    return data;
   }
  
   async function loadCertifications(query = "") {
@@ -112,7 +174,7 @@
       const params = new URLSearchParams();
       if (query) params.set("title", query);
       const res = await fetch(`${LIST_URL}?${params.toString()}`, {
-        headers: { "X-Requested-With": "XMLHttpRequest" },
+        headers: { Accept: "application/json" },
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const items = await res.json();
@@ -149,48 +211,43 @@
   }
  
   listEl.addEventListener("click", async (e) => {
-    const btn = e.target.closest(".star-btn");
-    if (!btn) return;
- 
-    if (!IS_AUTHENTICATED) {
-      showToast("Perlu login", "Silakan login untuk memberi star.", "error");
-      return;
-    }
- 
-    const url = STAR_URL_TEMPLATE.replace("00000000-0000-0000-0000-000000000000", btn.dataset.id);
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "X-CSRFToken": getCookie("csrftoken") },
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        showToast("Gagal", data.message || "Tidak dapat memperbarui star.", "error");
+    const starBtn = e.target.closest(".star-btn");
+    const deleteBtn = e.target.closest(".delete-btn");
+
+    if (starBtn) {
+      if (!IS_AUTHENTICATED) {
+        showToast("Perlu login", "Silakan login untuk memberi star.", "error");
         return;
       }
-      btn.setAttribute("aria-pressed", data.is_starred);
-      btn.title = data.starred_by_names || "Belum ada yang memberi star";
-      btn.innerHTML = `${data.is_starred ? "★ Starred" : "☆ Star"} (<span class="star-count">${data.star_count}</span>)`;
-    } catch (err) {
-      showToast("Gagal", "Terjadi masalah jaringan.", "error");
+      if (starBtn.disabled) return;
+      starBtn.disabled = true;
+      try {
+        const data = await apiRequest(certUrl(STAR_URL_TEMPLATE, starBtn.dataset.id), "POST");
+        starBtn.setAttribute("aria-pressed", data.is_starred);
+        starBtn.title = data.starred_by_names || "Belum ada yang memberi star";
+        starBtn.innerHTML = starLabel(data.is_starred, data.star_count);
+      } catch (err) {
+        showToast("Gagal", err.message, "error");
+      } finally {
+        starBtn.disabled = false;
+      }
+      return;
+    }
+
+    if (deleteBtn) {
+      if (deleteBtn.disabled) return;
+      if (!window.confirm("Hapus sertifikasi ini?")) return;
+      deleteBtn.disabled = true;
+      try {
+        await apiRequest(certUrl(DETAIL_URL_TEMPLATE, deleteBtn.dataset.id), "DELETE");
+        showToast("Berhasil", "Sertifikasi dihapus.", "success");
+        await loadCertifications(currentQuery);
+      } catch (err) {
+        showToast("Gagal", err.message, "error");
+        deleteBtn.disabled = false;
+      }
     }
   });
- 
-  const modal = document.getElementById("cert-modal");
-  const form = document.getElementById("cert-form");
-  const openBtn = document.getElementById("open-cert-modal");
-  const closeBtn = document.getElementById("close-cert-modal");
-  const submitBtn = document.getElementById("submit-cert");
- 
-  function formatErrors(errors) {
-    const lines = [];
-    for (const [field, list] of Object.entries(errors || {})) {
-      const label = form.querySelector(`label[for="id_${field}"]`);
-      const name = label ? label.textContent : field;
-      list.forEach((err) => lines.push(`${name}: ${err.message}`));
-    }
-    return lines.join(" | ") || "Data tidak valid.";
-  }
  
   if (modal && form && openBtn) {
     openBtn.addEventListener("click", () => modal.showModal());
@@ -201,23 +258,17 @@
       submitBtn.disabled = true;
  
       try {
-        const res = await fetch(CREATE_URL, { method: "POST", body: new FormData(form) });
-        const data = await res.json().catch(() => ({}));
- 
-        if (res.status === 201) {
-          showToast("Berhasil", data.message || "Sertifikasi berhasil ditambahkan.", "success");
-          form.reset();
-          modal.close();
-          loadCertifications(currentQuery);
-        } else if (res.status === 400) {
-          showToast("Data tidak valid", formatErrors(data.errors), "error", 5000);
-        } else if (res.status === 403) {
-          showToast("Akses ditolak", data.message || "Anda tidak berhak menambah data.", "error");
-        } else {
-          showToast("Gagal", data.message || `Terjadi kesalahan (${res.status}).`, "error");
-        }
+        const fields = new FormData(form);
+        const payload = Object.fromEntries(
+          ["title", "issuer", "issued_date", "credential_url"].map(name => [name, fields.get(name)])
+        );
+        await apiRequest(LIST_URL, "POST", payload);
+        showToast("Berhasil", "Sertifikasi berhasil ditambahkan.", "success");
+        form.reset();
+        modal.close();
+        await loadCertifications(currentQuery);
       } catch (err) {
-        showToast("Gagal", "Terjadi masalah jaringan.", "error");
+        showToast("Gagal menambah sertifikasi", err.message, "error", 5000);
       } finally {
         submitBtn.disabled = false;
       }
@@ -227,4 +278,3 @@
   loadCertifications();
 </script>
 {% endblock content %}
- 

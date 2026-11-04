@@ -32,30 +32,47 @@ class MainTest(TestCase):
         self.assertTrue(self.experience.is_ongoing)
 
     def test_experience_page(self):
+        # Halaman dirender lewat AJAX: HTML hanya memuat kerangka, data
+        # datang dari endpoint JSON.
         response = self.client.get(reverse("main:show_experience"))
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "experience.html")
-        self.assertContains(response, self.experience.title)
-        self.assertContains(response, self.experience.description)
-        self.assertContains(response, "Part-Time")
-        self.assertContains(response, "Sedang berlangsung")
+        self.assertContains(response, 'id="grid"')
+        self.assertContains(response, 'id="experience-search-form"')
         self.assertContains(response, f'href="{reverse("main:show_main")}"')
+
+        data = self.client.get(reverse("main:get_experiences_json")).json()
+        self.assertEqual(len(data), 1)
+        fields = data[0]["fields"]
+        self.assertEqual(fields["title"], self.experience.title)
+        self.assertEqual(fields["description"], self.experience.description)
+        self.assertEqual(fields["category_display"], "Part-Time")
+        self.assertTrue(fields["is_ongoing"])
 
     def test_empty_experience_page(self):
         Experience.objects.all().delete()
         response = self.client.get(reverse("main:show_experience"))
 
-        self.assertContains(response, "Belum ada pengalaman yang ditambahkan.")
+        self.assertContains(response, 'id="empty"')
+        self.assertContains(
+            response, "Belum ada pengalaman yang ditambahkan atau ditemukan."
+        )
+        self.assertEqual(
+            self.client.get(reverse("main:get_experiences_json")).json(), []
+        )
 
     def test_completed_experience(self):
         self.experience.ended_at = timezone.now()
         self.experience.save()
-        response = self.client.get(reverse("main:show_experience"))
 
         self.assertFalse(self.experience.is_ongoing)
-        self.assertContains(response, "Selesai")
-        self.assertNotContains(response, "Sedang berlangsung")
+        self.assertEqual(
+            self.client.get(reverse("main:show_experience")).status_code, 200
+        )
+        data = self.client.get(reverse("main:get_experiences_json")).json()
+        self.assertFalse(data[0]["fields"]["is_ongoing"])
+
 
 class CertificationPageTest(TestCase):
     def setUp(self):
@@ -80,13 +97,21 @@ class CertificationPageTest(TestCase):
         )
 
     def test_certification_data_appears_on_page(self):
-        response = self.client.get(reverse("main:show_certifications"))
+        # Halaman memuat daftar lewat API DRF, jadi data diperiksa di API.
+        page = self.client.get(reverse("main:show_certifications"))
+        self.assertContains(page, 'id="cert-list"')
+        self.assertContains(page, reverse("api:certification-list"))
 
-        self.assertContains(response, self.certification.title)
-        self.assertContains(response, self.certification.issuer)
+        data = self.client.get(reverse("api:certification-list")).json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["title"], self.certification.title)
+        self.assertEqual(data[0]["issuer"], self.certification.issuer)
 
     def test_empty_certification_page(self):
         Certification.objects.all().delete()
-        response = self.client.get(reverse("main:show_certifications"))
+        page = self.client.get(reverse("main:show_certifications"))
 
-        self.assertContains(response, "Belum ada sertifikasi yang ditambahkan.")
+        self.assertContains(page, "Belum ada sertifikasi.")
+        self.assertEqual(
+            self.client.get(reverse("api:certification-list")).json(), []
+        )
