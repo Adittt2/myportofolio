@@ -26,4 +26,9 @@ Dalam proses pembuuatan tugas 4, saya menggunakan bantuan dari generative AI, ya
 2.fetch() asinkron dan langsung mengembalikan Promise. Await menjeda fungsi async hingga Promise selesai dan memberikan nilai aslinya tanpa membekukan halaman. Sehingga jika tidak ada await, maka variabel hanya menyimpan Promise yang belum selesai dan bukan nilai aslinya.
 3.XSS merupakan serangan saat penyerang menyisipkan JavaScript ke halaman melalui input yang kemudian akan dijalankan di browser victim untuk bertindak atas nama mereja. Data AJAX lebih rentan karena tidak meng-escape {{}} secara otomatis seperti django, 
 
- 
+### Tugas 6
+
+1. REST itu aturan buat bikin layanan web. Client dan server dipisah, tiap request bawa info lengkap sendiri, dan tiap data punya URL sendiri. Aksinya pakai method yang sesuai: GET buat ambil, POST buat bikin, PUT/PATCH buat ubah, DELETE buat hapus. Balasannya pakai kode status, kayak 201 kalau berhasil dibuat atau 404 kalau tidak ketemu. Jadi nggak cukup cuma balikin JSON. 
+2. Serializer itu semacam penerjemah. Pas data keluar, dia ubah data dari database jadi JSON. Pas data masuk, dia cek dulu datanya bener dan bersih sebelum disimpan. Dia juga bisa nentuin field yang cuma boleh dibaca, nambah field hitungan kayak star_count, dan nyembunyiin data yang nggak boleh keliatan.
+3. Autentikasi itu untuk mengecek siapa/browser yang akses, jawabannya dari cookie sesi login. Otorisasi itu apa aja yang bisa mereka lakuin. Pengecekan hak akses harus di server karena nyembunyiin tombol cuma ngubah tampilan. 
+4. Browser otomatis ngirim cookie login ke website kita. Serangan CSRF itu ketika situs jahat manfaatin cookie buat nyuruh browser korban ngirim request hapus atau ubah data pakai akun korban tanpa sadar. Makanya DRF minta token khusus (X-CSRFToken) buat request yang ngubah data, dan situs lain nggak bisa ngambil token itu. force_authenticate di test langsung menganggap kalau sudah masuk dan ngelewatin pengecekan token, jadi test tetap lulus walau proteksi CSRF-nya mati.

@@ -13,6 +13,8 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.http import require_POST
 from main.forms import CertificationForm, ExperienceForm
 from main.models import Certification, Experience
+from django.views.decorators.csrf import ensure_csrf_cookie
+from main.permissions import is_editor
 
 
 def show_main(request):
@@ -34,92 +36,16 @@ def show_main(request):
 
 # Experience 
 
-def get_experiences_json(request):
-    title_query = request.GET.get("title", "").strip()
-    experiences = (
-        Experience.objects.prefetch_related("starred_by").order_by("-started_at")
-    )
-
-    if title_query:
-        experiences = experiences.filter(title__icontains=title_query)
-
-    data = []
-    for experience in experiences:
-        starred_users = list(experience.starred_by.all())
-        is_starred = (
-            request.user in starred_users if request.user.is_authenticated else False
-        )
-
-        data.append({
-            "pk": str(experience.id),
-            "fields": {
-                "title": experience.title,
-                "description": experience.description,
-                "category": experience.category,
-                "category_display": experience.get_category_display(),
-                "thumbnail": experience.thumbnail or "",
-                "is_ongoing": experience.is_ongoing,
-                "star_count": len(starred_users),
-                "is_starred": is_starred,
-                "starred_by_names": ", ".join(u.username for u in starred_users),
-            },
-        })
-
-    return JsonResponse(data, safe=False)
-
-
+@ensure_csrf_cookie
 def show_experience(request):
     title_query = request.GET.get("title", "").strip()
-
     context = {
         "name": "Aditya Hamka",
         "title_query": title_query,
         "form": ExperienceForm(),
+        "can_edit": request.user.is_superuser or is_editor(request.user),
     }
     return render(request, "experience.html", context)
-
-
-@require_POST
-def create_experience_ajax(request):
-    if not request.user.is_superuser:
-        return JsonResponse(
-            {"message": "Hanya pemilik portofolio yang dapat menambahkan pengalaman."},
-            status=403,
-        )
-
-    form = ExperienceForm(request.POST)
-    if form.is_valid():
-        experience = form.save()
-        return JsonResponse(
-            {"message": "Pengalaman berhasil ditambahkan.", "pk": str(experience.id)},
-            status=201,
-        )
-
-    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
-
-@require_POST
-def toggle_star_experience(request, experience_id):
-    if not request.user.is_authenticated:
-        return JsonResponse(
-            {"message": "Silakan login untuk memberi star."},
-            status=401,
-        )
-
-    experience = get_object_or_404(Experience, pk=experience_id)
-
-    if experience.starred_by.filter(pk=request.user.pk).exists():
-        experience.starred_by.remove(request.user)
-        is_starred = False
-    else:
-        experience.starred_by.add(request.user)
-        is_starred = True
-
-    starred_users = experience.starred_by.all()
-    return JsonResponse({
-        "is_starred": is_starred,
-        "star_count": starred_users.count(),
-        "starred_by_names": ", ".join(u.username for u in starred_users),
-    })
 
 @login_required(login_url="/login/")
 def create_experience(request):
